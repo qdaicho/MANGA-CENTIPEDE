@@ -1,0 +1,68 @@
+chapter_url: Manga/Onepunch-Man/chapter_1
+dark_mode: true
+local_library:
+  Onepunch-Man:
+    author: ONE
+    categories:
+    - Action
+    - Comedy
+    - Martial Arts
+    - Shounen
+    - Supernatural
+    - Seinen
+    description: "In this new action-comedy, everything about a young man named Saitama\
+      \ screams \u201CAVERAGE,\u201C from his lifeless expression, to his bald head,\
+      \ to his unimpressive physique. However, this average-looking fellow doesn\u2019\
+      t have your average problem... He\u2019s actually a superhero that\u2019s looking\
+      \ for tough opponents! The problem is, every time he finds a promising candidate\
+      \ he beats the snot out of them in one punch. Can Saitama finally find an evil\
+      \ villain strong enough to challenge him? Follow Saitama through his hilarious\
+      \ romps as he searches for new bad guys to challenge!"
+    manga_fullpath: /home/emsee/Documents/0___PYTHON WORKSPACE/MANGA CENTIPEDE 2.0/Manga/Onepunch-Man
+    num_of_downloaded_chaps: 4
+    poster_fullpath: /home/emsee/Documents/0___PYTHON WORKSPACE/MANGA CENTIPEDE 2.0/resrc/posters/Onepunch-Man.jpg
+    status: Ongoing
+    total_chapters: '131'
+  Terror Man:
+    author: Han Dong-Woo
+    categories:
+    - Action
+    - School Life
+    - Psychological
+    - Seinen
+    - Webtoons
+    description: "Min Jung Woo has a special ability, one that lets him see whenever\
+      \ a path leads to an unfortunate future. Min Jung Woo uses his eyes of \u201C\
+      Misfortune\u201C to spot unfortunate events and tries to stop them, leading\
+      \ him become a terrorist feared by the people."
+    manga_fullpath: /home/emsee/Documents/0___PYTHON WORKSPACE/MANGA CENTIPEDE 2.0/Manga/Terror
+      Man
+    num_of_downloaded_chaps: 2
+    poster_fullpath: /home/emsee/Documents/0___PYTHON WORKSPACE/MANGA CENTIPEDE 2.0/resrc/posters/Terror_Man.jpg
+    status: Ongoing
+    total_chapters: '146'
+  Tokyo Ghoul:
+    author: ISHIDA Sui
+    categories:
+    - Action
+    - Drama
+    - Fantasy
+    - Horror
+    - Supernatural
+    - Psychological
+    - Mystery
+    - Seinen
+    - Tragedy
+    description: "Strange murders are happening in Tokyo. Due to liquid evidence at\
+      \ the scene, the police conclude the attacks are the results of \u2019eater\u2019\
+      \ type ghouls. College buddies Kaneki and Hide come up with the idea that ghouls\
+      \ are imitating humans so that\u2019s why they haven\u2019t ever seen one. Little\
+      \ did they know that their theory may very well become reality."
+    manga_fullpath: /home/emsee/Documents/0___PYTHON WORKSPACE/MANGA CENTIPEDE 2.0/Manga/Tokyo
+      Ghoul
+    num_of_downloaded_chaps: 3
+    poster_fullpath: /home/emsee/Documents/0___PYTHON WORKSPACE/MANGA CENTIPEDE 2.0/resrc/posters/Tokyo_Ghoul.jpg
+    status: Completed
+    total_chapters: '143'
+  manga_title: []
+zoom_value: 100

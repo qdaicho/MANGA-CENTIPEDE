@@ -346,9 +346,10 @@ QMenu::separator
 
 QProgressBar
 {
-    border: 2px solid grey;
+    border: 0px solid grey;
     border-radius: 5px;
     text-align: center;
+    height: 15px
 }
 
 QProgressBar::chunk

@@ -10,6 +10,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import os
 
 
 
@@ -125,7 +126,7 @@ class Ui_MainWindow(object):
 
         self.searchBarHLayout.addWidget(self.searchBar)
 
-        self.searchButton = QtWidgets.QPushButton(self.searchPage)
+        self.searchButton = QtWidgets.QPushButton(self.searchPage, enabled = False)
         self.searchButton.setObjectName("searchButton")
         self.searchBarHLayout.addWidget(self.searchButton)
 
@@ -138,6 +139,10 @@ class Ui_MainWindow(object):
         # self.searchBarHLayout.addWidget(self.showBookmarksButton)
 
         self.searchPageVLayout.addLayout(self.searchBarHLayout)
+
+        self.downloadProgress = QtWidgets.QProgressBar(self.searchPage)
+        self.downloadProgress.setObjectName("downloadProgress")
+        self.searchPageVLayout.addWidget(self.downloadProgress)
         #######################################################################
         #										SCROLL AREA SETUP [FIXED]
         #######################################################################
@@ -177,154 +182,91 @@ class Ui_MainWindow(object):
 
     def infoWindow(self):
         self.infoPage.setObjectName("infoPage")
-        self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.infoPage)
-        self.verticalLayout_6.setObjectName("verticalLayout_6")
+        self.vLayoutForInfoPage = QtWidgets.QVBoxLayout(self.infoPage)
+        self.vLayoutForInfoPage.setObjectName("vLayoutForInfoPage")
+
         spacerItem1 = QtWidgets.QSpacerItem(
             20, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        self.verticalLayout_6.addItem(spacerItem1)
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.imageLabel = QtWidgets.QLabel(self.infoPage)
-        self.imageLabel.setObjectName("imageLabel")
-        self.horizontalLayout.addWidget(self.imageLabel)
-        self.mangaInfoForm = QtWidgets.QFormLayout()
-        self.mangaInfoForm.setLabelAlignment(
-            QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.mangaInfoForm.setFormAlignment(
-            QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        self.mangaInfoForm.setContentsMargins(20, 10, 10, 10)
-        self.mangaInfoForm.setHorizontalSpacing(20)
-        self.mangaInfoForm.setVerticalSpacing(10)
-        self.mangaInfoForm.setObjectName("mangaInfoForm")
-        self.title = QtWidgets.QLabel(self.infoPage)
-        self.title.setObjectName("title")
-        self.mangaInfoForm.setWidget(
-            0, QtWidgets.QFormLayout.LabelRole, self.title)
-        self.descriptionLabel = QtWidgets.QLabel(self.infoPage)
-        self.descriptionLabel.setObjectName("descriptionLabel")
-        self.mangaInfoForm.setWidget(
-            1, QtWidgets.QFormLayout.LabelRole, self.descriptionLabel)
-        self.categoriesLabel = QtWidgets.QLabel(self.infoPage)
-        self.categoriesLabel.setObjectName("categoriesLabel")
-        self.mangaInfoForm.setWidget(
-            2, QtWidgets.QFormLayout.LabelRole, self.categoriesLabel)
-        self.authorsLabel = QtWidgets.QLabel(self.infoPage)
-        self.authorsLabel.setObjectName("authorsLabel")
-        self.mangaInfoForm.setWidget(
-            3, QtWidgets.QFormLayout.LabelRole, self.authorsLabel)
-        self.statusLabel = QtWidgets.QLabel(self.infoPage)
-        self.statusLabel.setObjectName("statusLabel")
-        self.mangaInfoForm.setWidget(
-            4, QtWidgets.QFormLayout.LabelRole, self.statusLabel)
-        self.chaptersLabel = QtWidgets.QLabel(self.infoPage)
-        self.chaptersLabel.setObjectName("chaptersLabel")
-        self.mangaInfoForm.setWidget(
-            5, QtWidgets.QFormLayout.LabelRole, self.chaptersLabel)
-        self.chaptersValueLabel = QtWidgets.QLabel(self.infoPage)
-        self.chaptersValueLabel.setObjectName("chaptersValueLabel")
-        self.mangaInfoForm.setWidget(
-            5, QtWidgets.QFormLayout.FieldRole, self.chaptersValueLabel)
-        self.statusValueLabel = QtWidgets.QLabel(self.infoPage)
-        self.statusValueLabel.setObjectName("statusValueLabel")
-        self.mangaInfoForm.setWidget(
-            4, QtWidgets.QFormLayout.FieldRole, self.statusValueLabel)
-        self.authorsValueLabel = QtWidgets.QLabel(self.infoPage)
-        self.authorsValueLabel.setObjectName("authorsValueLabel")
-        self.mangaInfoForm.setWidget(
-            3, QtWidgets.QFormLayout.FieldRole, self.authorsValueLabel)
-        self.categoriesValueLabel = QtWidgets.QLabel(self.infoPage)
-        self.categoriesValueLabel.setObjectName("categoriesValueLabel")
-        self.mangaInfoForm.setWidget(
-            2, QtWidgets.QFormLayout.FieldRole, self.categoriesValueLabel)
-        self.descriptionValueLabel = QtWidgets.QLabel(self.infoPage)
-        self.descriptionValueLabel.setObjectName("descriptionValueLabel")
-        self.mangaInfoForm.setWidget(
-            1, QtWidgets.QFormLayout.FieldRole, self.descriptionValueLabel)
-        self.titleValueLabel = QtWidgets.QLabel(self.infoPage)
-        self.titleValueLabel.setObjectName("titleValueLabel")
-        self.mangaInfoForm.setWidget(
-            0, QtWidgets.QFormLayout.FieldRole, self.titleValueLabel)
-        self.downloadChapterButton = QtWidgets.QPushButton(self.infoPage)
-        self.downloadChapterButton.setObjectName("downloadChapterButton")
-        self.mangaInfoForm.setWidget(
-            6, QtWidgets.QFormLayout.LabelRole, self.downloadChapterButton)
-        self.chapterRangeSpinBox = QtWidgets.QSpinBox(self.infoPage)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.chapterRangeSpinBox.sizePolicy().hasHeightForWidth())
-        self.chapterRangeSpinBox.setSizePolicy(sizePolicy)
-        self.chapterRangeSpinBox.setMaximumSize(QtCore.QSize(80, 16777215))
-        self.chapterRangeSpinBox.setObjectName("chapterRangeSpinBox")
-        self.mangaInfoForm.setWidget(
-            6, QtWidgets.QFormLayout.FieldRole, self.chapterRangeSpinBox)
-        self.horizontalLayout.addLayout(self.mangaInfoForm)
-        self.verticalLayout_6.addLayout(self.horizontalLayout)
+        self.vLayoutForInfoPage.addItem(spacerItem1)
+
+        self.infoBarHLayout = QtWidgets.QHBoxLayout()
+        self.infoBarHLayout.setObjectName("infoBarHLayout")
+
+        self.backButton = QtWidgets.QPushButton(self.infoPage)
+        self.backButton.setObjectName("backButton")
+        self.backButton.setText("Back")
+        self.infoBarHLayout.addWidget(self.backButton)
+
+        hspacer = QtWidgets.QSpacerItem(1000, 20, QtWidgets.QSizePolicy.Expanding)
+        self.infoBarHLayout.addItem(hspacer)
+
+        self.downloadChaptersButton = QtWidgets.QPushButton(self.infoPage)
+        self.downloadChaptersButton.setObjectName("downloadChaptersButton")
+        self.downloadChaptersButton.setText("Download Chapters")
+        self.infoBarHLayout.addWidget(self.downloadChaptersButton)
+
+        self.chapterNumberSpinBox = QtWidgets.QSpinBox(self.infoPage)
+        self.chapterNumberSpinBox.setObjectName("chapterNumberSpinBox")
+        self.infoBarHLayout.addWidget(self.chapterNumberSpinBox)
+
+
+
+        self.vLayoutForInfoPage.addLayout(self.infoBarHLayout)
+
+        self.downloadProgressForChapters = QtWidgets.QProgressBar(self.infoPage)
+        self.downloadProgressForChapters.setObjectName("downloadProgressForChapters")
+        self.vLayoutForInfoPage.addWidget(self.downloadProgressForChapters)
+
+
+        #######################################################################
+        #                                       INFO AREA SETUP [FIXED]
+        #######################################################################
+
+
+
+        self.infoLabel = QLabel2()
+        self.infoLabel.setText("dummy text")
+        self.infoLabel.setFixedHeight(300)
+        # self.infoLabel.addStretch()
+        self.infoLabel.setWordWrap(True)
+        self.infoLabel.setTextFormat(QtCore.Qt.RichText)
+        self.infoLabel.setFrameShape(QtWidgets.QFrame.Box)
+        self.infoLabel.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.infoLabel.setLineWidth(1)
+        # self.infoLabel.setStyleSheet("QLabel::hover{background-color : #4a4848;}")
+        self.vLayoutForInfoPage.addWidget(self.infoLabel)
+
         self.chapterListLabel = QtWidgets.QLabel(self.infoPage)
-        font = QtGui.QFont()
-        font.setPointSize(20)
-        self.chapterListLabel.setFont(font)
-        self.chapterListLabel.setFrameShape(QtWidgets.QFrame.Box)
-        self.chapterListLabel.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.chapterListLabel.setText(
+            """<h4 style="color: #ffa02f;">Downloaded Chapters List</h4>""")
         self.chapterListLabel.setAlignment(QtCore.Qt.AlignCenter)
-        self.chapterListLabel.setObjectName("chapterListLabel")
-        self.verticalLayout_6.addWidget(self.chapterListLabel)
-        self.chapterListScrollArea = QtWidgets.QScrollArea(self.infoPage)
-        self.chapterListScrollArea.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.chapterListLabel.setFrameShape(QtWidgets.QFrame.Box)
+        self.chapterListLabel.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.chapterListLabel.setLineWidth(1)
+        self.chapterListLabel.setFixedHeight(50)
+        self.vLayoutForInfoPage.addWidget(self.chapterListLabel)
+
+        self.chapterListScrollArea = QtWidgets.QScrollArea(self.searchPage)
+        # self.chapterListScrollArea.setFrameShape(QtWidgets.QFrame.Box)
+        # self.chapterListScrollArea.setFrameShadow(QtWidgets.QFrame.Raised)
+        # self.chapterListScrollArea.setLineWidth(2)
         self.chapterListScrollArea.setWidgetResizable(True)
+        self.chapterListScrollArea.setAlignment(QtCore.Qt.AlignCenter)
         self.chapterListScrollArea.setObjectName("chapterListScrollArea")
+
         self.chapterListScrollAreaWidgetContents = QtWidgets.QWidget()
-        self.chapterListScrollAreaWidgetContents.setGeometry(
-            QtCore.QRect(0, 0, 707, 177))
-        self.chapterListScrollAreaWidgetContents.setObjectName(
-            "chapterListScrollAreaWidgetContents")
-        self.gridLayout_3 = QtWidgets.QGridLayout(
-            self.chapterListScrollAreaWidgetContents)
-        self.gridLayout_3.setObjectName("gridLayout_3")
-        self.chapterListGridLayout = QtWidgets.QGridLayout()
+        self.chapterListScrollAreaWidgetContents.setObjectName("chapterListScrollAreaWidgetContents")
+        self.chapterListScrollArea.setAlignment(QtCore.Qt.AlignCenter)
+        self.chapterListScrollArea.setWidget(self.chapterListScrollAreaWidgetContents)
+
+
+        self.chapterListGridLayout = QtWidgets.QGridLayout(self.chapterListScrollAreaWidgetContents)
         self.chapterListGridLayout.setObjectName("chapterListGridLayout")
-        self.chapter_4 = QtWidgets.QLabel(
-            self.chapterListScrollAreaWidgetContents)
-        self.chapter_4.setObjectName("chapter_4")
-        self.chapterListGridLayout.addWidget(self.chapter_4, 1, 0, 1, 1)
-        self.chapter_1 = QtWidgets.QLabel(
-            self.chapterListScrollAreaWidgetContents)
-        self.chapter_1.setObjectName("chapter_1")
-        self.chapterListGridLayout.addWidget(self.chapter_1, 0, 0, 1, 1)
-        self.chapter_7 = QtWidgets.QLabel(
-            self.chapterListScrollAreaWidgetContents)
-        self.chapter_7.setObjectName("chapter_7")
-        self.chapterListGridLayout.addWidget(self.chapter_7, 2, 0, 1, 1)
-        self.chapter_2 = QtWidgets.QLabel(
-            self.chapterListScrollAreaWidgetContents)
-        self.chapter_2.setObjectName("chapter_2")
-        self.chapterListGridLayout.addWidget(self.chapter_2, 0, 1, 1, 1)
-        self.chapter_3 = QtWidgets.QLabel(
-            self.chapterListScrollAreaWidgetContents)
-        self.chapter_3.setObjectName("chapter_3")
-        self.chapterListGridLayout.addWidget(self.chapter_3, 0, 2, 1, 1)
-        self.chapter_5 = QtWidgets.QLabel(
-            self.chapterListScrollAreaWidgetContents)
-        self.chapter_5.setObjectName("chapter_5")
-        self.chapterListGridLayout.addWidget(self.chapter_5, 1, 1, 1, 1)
-        self.chapter_6 = QtWidgets.QLabel(
-            self.chapterListScrollAreaWidgetContents)
-        self.chapter_6.setObjectName("chapter_6")
-        self.chapterListGridLayout.addWidget(self.chapter_6, 1, 2, 1, 1)
-        self.chapter_8 = QtWidgets.QLabel(
-            self.chapterListScrollAreaWidgetContents)
-        self.chapter_8.setObjectName("chapter_8")
-        self.chapterListGridLayout.addWidget(self.chapter_8, 2, 1, 1, 1)
-        self.chapter_9 = QtWidgets.QLabel(
-            self.chapterListScrollAreaWidgetContents)
-        self.chapter_9.setObjectName("chapter_9")
-        self.chapterListGridLayout.addWidget(self.chapter_9, 2, 2, 1, 1)
-        self.gridLayout_3.addLayout(self.chapterListGridLayout, 0, 0, 1, 1)
-        self.chapterListScrollArea.setWidget(
-            self.chapterListScrollAreaWidgetContents)
-        self.verticalLayout_6.addWidget(self.chapterListScrollArea)
+        self.chapterListGridLayout.setContentsMargins(10, 5, 10, 500)
+        self.chapterListGridLayout.setSpacing(5)
+
+
+        self.vLayoutForInfoPage.addWidget(self.chapterListScrollArea)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -336,55 +278,9 @@ class Ui_MainWindow(object):
             _translate("MainWindow", "Library"))
         # self.showBookmarksButton.setText(_translate("MainWindow", "Bookmarks"))
 
-        self.imageLabel.setText(_translate("MainWindow", "TextLabel"))
-        self.title.setText(_translate("MainWindow", "Title:"))
-        self.descriptionLabel.setText(_translate("MainWindow", "Description:"))
-        self.categoriesLabel.setText(_translate("MainWindow", "Categories:"))
-        self.authorsLabel.setText(_translate("MainWindow", "Authors:"))
-        self.statusLabel.setText(_translate("MainWindow", "Status:"))
-        self.chaptersLabel.setText(_translate("MainWindow", "Chapters:"))
-        self.chaptersValueLabel.setText(_translate("MainWindow", "TextLabel"))
-        self.statusValueLabel.setText(_translate("MainWindow", "TextLabel"))
-        self.authorsValueLabel.setText(_translate("MainWindow", "TextLabel"))
-        self.categoriesValueLabel.setText(
-            _translate("MainWindow", "TextLabel"))
-        self.descriptionValueLabel.setText(
-            _translate("MainWindow", "TextLabel"))
-        self.titleValueLabel.setText(_translate("MainWindow", "TextLabel"))
-        self.downloadChapterButton.setText(
-            _translate("MainWindow", "Download To Chapter: "))
-        self.chapterListLabel.setText(_translate("MainWindow", "CHAPTER LIST"))
-        self.chapter_4.setText(_translate("MainWindow", "TextLabel"))
-        self.chapter_1.setText(_translate("MainWindow", "TextLabel"))
-        self.chapter_7.setText(_translate("MainWindow", "TextLabel"))
-        self.chapter_2.setText(_translate("MainWindow", "TextLabel"))
-        self.chapter_3.setText(_translate("MainWindow", "TextLabel"))
-        self.chapter_5.setText(_translate("MainWindow", "TextLabel"))
-        self.chapter_6.setText(_translate("MainWindow", "TextLabel"))
-        self.chapter_8.setText(_translate("MainWindow", "TextLabel"))
-        self.chapter_9.setText(_translate("MainWindow", "TextLabel"))
         self.navMenu.setTabText(self.navMenu.indexOf(
             self.browseMangaTab), _translate("MainWindow", "Browse Manga"))
         self.navMenu.setTabText(self.navMenu.indexOf(
             self.settingsTab), _translate("MainWindow", "Settings"))
         self.navMenu.setTabText(self.navMenu.indexOf(
             self.aboutTab), _translate("MainWindow", "About"))
-
-
-# if __name__ == "__main__":
-#     import sys
-#     app = QtWidgets.QApplication(sys.argv)
-#     MainWindow = QtWidgets.QMainWindow()
-#     ui = Ui_MainWindow()
-#     ui.setupUi(MainWindow)
-
-#     fname = "darkorange.txt"
-#     whole_text = ""
-#     with open(fname, 'r') as f:
-#         # this way of reading the file gives a list of lines.
-#         data_text = f.readlines()
-#         # create a text out of the file
-#         whole_text = (' '.join(data_text))
-#     MainWindow.setStyleSheet(whole_text)
-#     MainWindow.show()
-#     sys.exit(app.exec_())

@@ -9,6 +9,7 @@ import requests
 from urllib.parse import urlparse
 from os.path import splitext
 import re
+import yaml
 from configparser import ConfigParser
 from mainwindow import Ui_MainWindow, QLabel2
 
@@ -29,23 +30,81 @@ class Main(QMainWindow, Ui_MainWindow):
 
         self.setStyleSheet(whole_text)
 
-    #     self.PushButton1.clicked.connect(self.OpenWindow1)
-    #     self.PushButton2.clicked.connect(self.OpenWindow2)
-
-    #     self.PushButton3.clicked.connect(self.GoToMain)
-    #     self.PushButton4.clicked.connect(self.OpenWindow2)
-
-    #     self.PushButton5.clicked.connect(self.GoToMain)
-    #     self.PushButton6.clicked.connect(self.OpenWindow1)
+        self.searchBar.textChanged[str].connect(lambda: self.searchButton.setEnabled(self.searchBar.text() != ""))
         self.searchButton.clicked.connect(lambda: self.searchForManga())
+        self.backButton.clicked.connect(lambda: self.goToSearchPage())
+        self.downloadChaptersButton.clicked.connect(lambda: self.downloadManga())
 
         self.crawler = MangakisaCrawler()
 
+    def downloadManga(self):
+        number_of_chapters = self.chapterNumberSpinBox.value()
+        if number_of_chapters > 0:
+            self.crawler.downloadChaptersAndOrganize(self.manga_info, self.manga_info.get("Title"), 
+                    self.manga_info.get("Chapter Links"), self.manga_info.get("Poster"), number_of_chapters)
+
+    def goToSearchPage(self):
+        self.browseStackedWidget.setCurrentIndex(0)
     # This function is going to populate the search results with the search
     # term
-    def click(self):
-        print("clicked")
-        # self.browseStackedWidget.setCurrentIndex(1)
+    def goToInfoPage(self, manga_url, image_path):
+        self.manga_info = self.crawler.getMangaInfo(manga_url)
+        # pprint(self.manga_info)
+        self.browseStackedWidget.setCurrentIndex(1)
+        self.clearLayout(self.chapterListGridLayout)
+        self.chapterNumberSpinBox.setMaximum(int(self.manga_info["Total Chapters"]))
+
+        text = '''
+            <div>
+            <div><img src="{0}"  width="235" height="300" style=" float:left; padding:30px"></div>
+            <div style="margin-left:260px; margin-right:40px;">
+                <h4>{1}</h4>
+                <p style="color:darkgrey;font-size:11px;">{2}</p>
+                <div style="font-size:10px;">
+                    <b style="color:darkgrey;">Categories: </b><i style="color:#ffa02f;">{3}</i>
+                    <br><br>
+                    <b style="color:darkgrey;">Authors: </b> <i style="color:#ffa02f;">{4}</i>
+                    <br><br>
+                    <b style="color:darkgrey;">Status: </b> <i style="color:#ffa02f;">{5}</i>
+                    <br><br>
+                    <b style="color:darkgrey;">Chapters: </b> <i style="color:#ffa02f;">{6}</i>
+                </div>
+                <div>
+                </div>
+            </div>
+        '''.format(image_path, self.manga_info["Title"],
+            self.manga_info["Description"], ", ".join(self.manga_info["Categories"]),
+            self.manga_info["Author"],self.manga_info["Status"],self.manga_info["Total Chapters"])
+
+        self.infoLabel.setText(text)
+
+        self.chapter_label = [QLabel2() for i in range(int(self.manga_info["Total Chapters"]))]
+        # pprint(self.chapter_label)
+        # print(len(self.chapter_label))
+
+        x = 0
+        y = 0
+        for i in range(len(self.chapter_label)):               
+            self.chapter_label[i] = QLabel2()
+            self.chapter_label[i].setTextFormat(QtCore.Qt.RichText)
+            self.chapter_label[i].setText("""<h5><br>chapter_{}<br></h5>""".format(str(i+1)))
+            self.chapter_label[i].setAlignment(QtCore.Qt.AlignCenter)
+            self.chapter_label[i].setWordWrap(True)
+            self.chapter_label[i].setFrameShape(QtWidgets.QFrame.Box)
+            self.chapter_label[i].setFrameShadow(QtWidgets.QFrame.Raised)
+            self.chapter_label[i].setLineWidth(1)
+            self.chapter_label[i].setStyleSheet("QLabel::hover{background-color : #4a4848;}")
+            self.vLayoutForResults.addWidget(self.chapter_label[i]) 
+            # self.chapter_label[-1].clicked.connect()
+            # print("x: {}\n y:{}".format(str(x), str(y)))
+            self.chapterListGridLayout.addWidget(self.chapter_label[i], x, y)
+
+            if y < 2:
+                y+=1
+            else:
+                y = 0
+                x+=1
+
 
     """THIS FUNCTION CLEARS ALL THE WIDGETS IN A LAYOUT"""
 
@@ -68,22 +127,26 @@ class Main(QMainWindow, Ui_MainWindow):
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Return:
-            self.searchForManga()
+            self.searchButton.animateClick();
+            # self.searchForManga()
         elif event.key() == QtCore.Qt.Key_S:
             self.searchBar.setFocus()
 
     def searchForManga(self):
-        self.clearFolder(os.getcwd() + "/resrc/temp/")
-        # rm anything that isn't letter or space char
-        search_term = re.sub(r'[^a-zA-Z\d\s]', u'', self.searchBar.text(), flags=re.UNICODE) 
-        # print(search_term)
-        self.clearLayout(self.vLayoutForResults)
-        self.populateSearchResults(search_term)
+        if self.searchBar.text() != "":
+            self.clearFolder(os.path.join(os.getcwd(), os.path.join("resrc", "temp")))
+            # rm anything that isn't letter or space char
+            search_term = re.sub(r'[^a-zA-Z\d\s]', u'', self.searchBar.text(), flags=re.UNICODE) 
+            # print(search_term)
+            self.clearLayout(self.vLayoutForResults)
+            self.populateSearchResults(search_term)
 
 
     def populateSearchResults(self, search_term):
         manga_previews = self.crawler.getSearchResults(search_term)
-        pprint(manga_previews)
+        self.searchBar.setEnabled(False)
+        self.searchButton.setEnabled(False)
+        # pprint(manga_previews)
         self.results_label = []
 
         if len(manga_previews.keys()) > 20:
@@ -91,8 +154,10 @@ class Main(QMainWindow, Ui_MainWindow):
         else:
             total_iterations = len(manga_previews.keys())
 
+        self.downloadProgress.setMaximum(total_iterations)
+
         for i in range(total_iterations):
-            self.results_label.append(QtWidgets.QLabel())
+            self.results_label.append(QLabel2())
         
         # print(len(self.results_label))
 
@@ -102,17 +167,19 @@ class Main(QMainWindow, Ui_MainWindow):
             
 
             if 'Search Not Found' in manga_previews.keys():
-                image_path = os.getcwd() + "/resrc/404.png"
+                image_path = os.path.join(os.getcwd(), os.path.join("resrc", "404.png"))
             else:
                 url = manga_previews[title][1]
                 page = requests.get(url)
                 extension = self.get_ext(manga_previews[title][1])
                 f_name = '{0}{1}'.format(i,extension)
             # print(f_name)
-                with open(os.getcwd() + "/resrc/temp/" + f_name, 'wb') as f:
+                x = os.path.join(os.getcwd(), os.path.join("resrc", os.path.join("temp", f_name)))
+                with open(x, 'wb') as f:
                     f.write(page.content)
 
-                image_path = os.getcwd() + "/resrc/temp/{0}{1}".format(i, extension)
+                # image_path = os.path.join(x, "{0}{1}".format(i, extension))
+                image_path = x
             # print(image_path)
             
             text = '''
@@ -128,7 +195,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 </div>
         '''.format(image_path, title, status, categories)
 
-            self.results_label[-1] = QLabel2()
+            # self.results_label[-1] = QLabel2()
             self.results_label[-1].setText(text)
             # self.results_label[-1].setAlignment(QtCore.Qt.AlignCenter)
             self.results_label[-1].setWordWrap(True)
@@ -137,23 +204,37 @@ class Main(QMainWindow, Ui_MainWindow):
             self.results_label[-1].setFrameShadow(QtWidgets.QFrame.Raised)
             self.results_label[-1].setLineWidth(1)
             self.results_label[-1].setStyleSheet("QLabel::hover{background-color : #4a4848;}")
-            self.vLayoutForResults.addWidget(self.results_label[-1])
-            # labelRT.clicked.connect(lambda: self.click())
+            self.vLayoutForResults.addWidget(self.results_label[-1]) 
+            self.results_label[-1].clicked.connect(
+                lambda link=manga_previews[title][0], p =image_path: self.goToInfoPage(link, p))
+            self.downloadProgress.setValue(i+1)
+        self.searchBar.clear()
+        self.searchBar.setEnabled(True)
+        self.searchButton.setEnabled(True)
+        self.downloadProgress.reset()
+
     def openLibrary(self):
         pass
-    # def OpenWindow1(self):
-    #     self.QtStack.setCurrentIndex(1)
 
-    # def OpenWindow2(self):
-    #     self.QtStack.setCurrentIndex(2)
 
-    # def GoToMain(self):
-    #     self.QtStack.setCurrentIndex(0)
+    def yaml_loader(self, filepath):
+        """loads a YAML FILE"""
+        with open(filepath, "r") as filedescriptor:
+            data = yaml.safe_load(filedescriptor)
+        return data
 
+    def yaml_dump(self, filepath, data):
+        """dumps data to a yaml file"""
+        with open(filepath, "w") as filedescriptor:
+            yaml.safe_dump(data, filedescriptor)
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     showMain = Main()
-    showMain.show()
-    # showMain.populateSearchResults("terror man")
 
+    sizeObject = QtWidgets.QDesktopWidget().screenGeometry(-1)
+    w = int(sizeObject.width()/2)
+    h = int(sizeObject.height())
+    showMain.resize(w, h)
+
+    showMain.show()
     sys.exit(app.exec_())

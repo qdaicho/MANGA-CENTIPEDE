@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 from pprint import pprint
 import os
+import yaml
+from mainwindow import Ui_MainWindow
 
 class MangakisaCrawler():
     """docstring for ClassName"""
@@ -133,7 +135,19 @@ Let's say you are searching for "Seven Deadly Sins":
 
         except requests.exceptions.Timeout:
             print("Timeout occurred")
-
+        except:
+            manga_info = {}
+            manga_info["Title"] = "Search not Found"
+            manga_info["Poster"] = os.path.join(os.getcwd(), os.path.join('resrc','404.png' ))
+            manga_info["Description"] = """Lorem Ipsum is simply dummy text of the printing and 
+            typesetting industry. Lorem Ipsum has been the industry's standard dummy 
+            text ever since the 1500s, when an unknown printer took a galley of type 
+            and scrambled it to make a type specimen book."""
+            manga_info["Categories"] = ["Null", 'Apples']
+            manga_info["Author"] = "John Doe"
+            manga_info["Status"] = "Broken"
+            manga_info["Total Chapters"] = "0"
+            manga_info["Chapter Links"] = "Null"
         return manga_info
 
     #this function returns a list of all the image urls of any webpage
@@ -165,10 +179,11 @@ Let's say you are searching for "Seven Deadly Sins":
                                stream=True, headers={'User-agent': 'Mozilla/5.0'})
 
             if pic.status_code == 200:
-                with open(fullpath + "/pg" + str(i) + filetype, 'wb') as f:
+                with open(os.path.join(fullpath,"pg" + str(i) + filetype), 'wb') as f:
                     f.write(pic.content)
 
-    def downloadChaptersAndOrganize(self, manga_title, chapter_links, download_range_lower, download_range_upper):
+    def downloadChaptersAndOrganize(self, manga_info, manga_title, chapter_links, 
+        poster_link, download_range_upper):
         # first enter Manga folder
         # check then check if the folder called "manga_title exists"
 
@@ -181,37 +196,85 @@ Let's say you are searching for "Seven Deadly Sins":
         # if it doesn't exist, make a new folder and then do all the steps above
 
         current_directory = os.getcwd()
+        resrc_directory = os.path.join(current_directory, r'resrc')
+        library_posters = os.path.join(resrc_directory, r'posters')
         library_directory = os.path.join(current_directory, r'Manga')
         manga_folder = os.path.join(library_directory, manga_title)
-        # print(manga_folder)
+
+        #over here, we download the poster for the specific manga in the posters directory
+        if ".jpg" in poster_link:
+            filetype = ".jpg"
+        else:
+            filetype = ".png"
+
+        poster_fullpath = os.path.join(library_posters, manga_title.replace(" ", "_") + filetype)
+
+        pic = requests.get(poster_link, stream=True, headers={'User-agent': 'Mozilla/5.0'})
+
+        if pic.status_code == 200:
+            with open(poster_fullpath, 'wb') as f:
+                f.write(pic.content)
 
         #Make a folder for the manga that is being downloaded if it doesn't already exist
         if not os.path.exists(manga_folder):
            os.makedirs(manga_folder)
 
         for i in range(len(chapter_links)):
-            chapter_folder = os.path.join(manga_folder, "chapter_" + str(i))
-
-            if i >= download_range_lower and i <= download_range_upper and not os.path.exists(chapter_folder):
+            chapter_folder = os.path.join(manga_folder, "chapter_" + str(i+1))
+            # print(chapter_folder)
+            if i >= 0 and i <= download_range_upper-1 and not os.path.exists(chapter_folder):
                    os.makedirs(chapter_folder)
                    image_list = self.getAllChapterImgLinks(chapter_links[i])
                    self.downloadImgsToDir(image_list, chapter_folder)
-        
+            # else:
+            #     break
+
+        #now we have completed the download, we have to write all the info into our library
+        self.data = self.yaml_loader('config.yaml')
+
+        # if not (manga_title in self.data.get("local_library")):
+        #     self.data.get("local_library").update(manga_title=[])
+
+        self.data["local_library"][manga_title] = dict(
+            manga_fullpath = manga_folder,
+            poster_fullpath = poster_fullpath,
+            description = manga_info["Description"],
+            categories = manga_info["Categories"],
+            author = manga_info["Author"],
+            status = manga_info["Status"],
+            total_chapters = manga_info["Total Chapters"],
+            num_of_downloaded_chaps = len(os.listdir(manga_folder))
+            )
+
+        self.yaml_dump("config.yaml", self.data)
+        # print(self.data.get("local_library").get("Tokyo Ghoul")[1])
+
 
     # def updateMangaChapters
+    def yaml_loader(self, filepath):
+        """loads a YAML FILE"""
+        with open(filepath, "r") as filedescriptor:
+            data = yaml.safe_load(filedescriptor)
+        return data
+
+    def yaml_dump(self, filepath, data):
+        """dumps data to a yaml file"""
+        with open(filepath, "w") as filedescriptor:
+            yaml.safe_dump(data, filedescriptor)
 
 
 
 # def main():
 #     crawler = MangakisaCrawler()
-#     manga_previews = crawler.getSearchResults("tokyo     ")
-#     pprint(manga_previews)
-#     # manga_info = crawler.getMangaInfo(manga_previews.get("Tokyo Ghoul")[0])#inputting selected manga url from preview
+#     manga_previews = crawler.getSearchResults("one     ")
+#     # pprint(manga_previews)
+#     manga_info = crawler.getMangaInfo(manga_previews.get("Onepunch-Man")[0])#inputting selected manga url from preview
     
-#     # pprint(manga_info)
+#     pprint(manga_info)
 #     # print(len(manga_info.get("Chapter Links")))
 
-#     # crawler.downloadChaptersAndOrganize(manga_info.get("Title"), manga_info.get("Chapter Links"), 0, 10)
+#     crawler.downloadChaptersAndOrganize(manga_info, manga_info.get("Title"), 
+#         manga_info.get("Chapter Links"), manga_info.get("Poster"), 4)
 
 
 

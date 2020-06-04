@@ -14,7 +14,8 @@ import pprint
 import os.path
 import time
 import sys
-from configparser import ConfigParser
+# from configparser import ConfigParser
+import yaml
 
 EXIT_CODE_REBOOT = -11231351
 
@@ -24,7 +25,7 @@ class Reader(QtWidgets.QWidget):
     def setup(self, MainWindow):
         #######################################################################
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
+        # MainWindow.resize(800, 600)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
@@ -102,15 +103,17 @@ class Reader(QtWidgets.QWidget):
         self.scrollArea.setWidget(content_widget)
         self.image_viewer_layout = QtWidgets.QVBoxLayout(content_widget)
 
-        self.config = ConfigParser()
-        self.config.read('config.ini')
-        # self.config.set('main', 'a', 'orange')#set key-value pair in section main
-        with open('config.ini', 'w') as f:
-            self.config.write(f)
+        # self.config = ConfigParser()
+        # self.config.read('config.ini')
+        # # self.config.set('main', 'a', 'orange')#set key-value pair in section main
+        # with open('config.ini', 'w') as f:
+        #     self.config.write(f)
 
+        self.data = self.yaml_loader('config.yaml')
+        # print(self.data)
 
         # url = "/home/emsee/Documents/Manga/Tokyo Ghoul/chapter_3"
-        url = self.config.get('main', 'chapter_url')
+        url = os.path.join(os.getcwd(),self.data.get('chapter_url'))
         # print(url)
 
         #used once in bottom nav bar to set combo box text
@@ -121,7 +124,7 @@ class Reader(QtWidgets.QWidget):
         self.image_url_list = self.sorted_nicely(
             [os.path.join(url, file) for file in os.listdir(url)])
         self.image_url_list = self.image_url_list[1:-1]
-        # pprint.pprint(self.image_url_list)
+        # p# print.pprint(self.image_url_list)
 
         self.hundred_percent_zoom = 730
         self.zoomValue = 100
@@ -163,7 +166,7 @@ class Reader(QtWidgets.QWidget):
         else:
             lastIndex = self.manga_chapter_list.index(self.current_chap)-1
 
-        lastChapURL = self.config.get('main', 'chapter_url').replace(self.current_chap, self.manga_chapter_list[lastIndex])
+        lastChapURL = self.data.get('chapter_url').replace(self.current_chap, self.manga_chapter_list[lastIndex])
         self.lastChapterButton.clicked.connect(lambda: self.restartApp(lastChapURL))
 
 
@@ -179,7 +182,7 @@ class Reader(QtWidgets.QWidget):
         else:
             nextIndex = self.manga_chapter_list.index(self.current_chap)+1
 
-        nextChapURL = self.config.get('main', 'chapter_url').replace(self.current_chap, self.manga_chapter_list[nextIndex])
+        nextChapURL = self.data.get('chapter_url').replace(self.current_chap, self.manga_chapter_list[nextIndex])
         self.nextChapterButton.clicked.connect(lambda: self.restartApp(nextChapURL))
 
 
@@ -187,7 +190,7 @@ class Reader(QtWidgets.QWidget):
         # ATTACH BOTTOM NAVIGATION BAR
         #######################################################################
         MainWindow.setCentralWidget(self.centralwidget)
-        MainWindow.showMaximized()
+        # MainWindow.showMaximized()
 
 
         self.retranslateUi(MainWindow)
@@ -207,6 +210,17 @@ class Reader(QtWidgets.QWidget):
             _translate("MainWindow", "Next Chapter"))
         self.lastChapterButton.setText(
             _translate("MainWindow", "Last Chapter"))
+
+    def yaml_loader(self, filepath):
+        """loads a YAML FILE"""
+        with open(filepath, "r") as filedescriptor:
+            data = yaml.safe_load(filedescriptor)
+        return data
+
+    def yaml_dump(self, filepath, data):
+        """dumps data to a yaml file"""
+        with open(filepath, "w") as filedescriptor:
+            yaml.safe_dump(data, filedescriptor)
 
     def sorted_nicely(self, l):
         """ Sort the given iterable in the way that humans expect."""
@@ -263,7 +277,7 @@ class Reader(QtWidgets.QWidget):
                 self.image_pixmap_list.append(QtGui.QPixmap(image, str(self.counter)))
 
             # if len(self.image_pixmap_list) == len(self.image_url_list):
-            #     pprint.pprint(self.image_pixmap_list)
+            #     p# print.pprint(self.image_pixmap_list)
             total_pages = len(self.image_url_list)
             for i in range(len(self.image_url_list)):
                 pic = self.image_pixmap_list[i].scaled(
@@ -278,11 +292,10 @@ class Reader(QtWidgets.QWidget):
 
     def restartApp(self, chapter_url_plus_number):
         if chapter_url_plus_number == " ":
-            chapter_url_plus_number =  self.config.get('main', 'chapter_url').replace(self.current_chap, self.mangaChapterComboBox.currentText())
-        # print(chapter_url_plus_number)        
-        self.config.set('main', 'chapter_url', chapter_url_plus_number)
-        with open('config.ini', 'w') as f:
-            self.config.write(f)
+            chapter_url_plus_number =  self.data.get('chapter_url').replace(self.current_chap, self.mangaChapterComboBox.currentText())
+        # print(chapter_url_plus_number)
+        self.data["chapter_url"] = chapter_url_plus_number        
+        self.yaml_dump("config.yaml", self.data)
         # os.execv(sys.executable, ['python3'] + sys.argv)
         return QtCore.QCoreApplication.exit( EXIT_CODE_REBOOT )          
  
@@ -307,6 +320,12 @@ def start_app():
         MainWindow = QtWidgets.QMainWindow()
         ui = Reader()
         ui.setup(MainWindow)
+
+        sizeObject = QtWidgets.QDesktopWidget().screenGeometry(-1)
+        w = int(sizeObject.width()/2)
+        h = int(sizeObject.height())
+        MainWindow.resize(w, h)
+
         MainWindow.show()
 
         fname="darkorange.txt"
@@ -324,5 +343,5 @@ def start_app():
 
 if __name__ == "__main__":
     start_app()
-    print("we are out of the application")
+    # print("we are out of the application")
 
